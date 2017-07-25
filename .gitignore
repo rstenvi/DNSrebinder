@@ -1,0 +1,6 @@
+
+*.pyc
+*.bak
+*.log
+config/
+examples/
