@@ -93,3 +93,21 @@ supported.
 ]
 }
 ~~~
+
+
+## Browser Test
+
+A test of different browsers and how they implemented protections against DNS
+rebinding was performed in July 2017. The result of the test can be found
+[here](https://rstenvi.github.io/dnsrebinder/) while the code can be found
+[here](browsertest/).
+
+If you want to run the test yourself, you have to replace the domain name in the
+[config file](browsertest/config.json). The remaining code should work without
+any modifications.
+
+The command to run the test-server from this directory would be similar to this:
+
+~~~
+sudo python DNSRebinder.py -d browsertest/www/ -c browsertest/config.json -r example.com -I eth0
+~~~
