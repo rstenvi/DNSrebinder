@@ -95,6 +95,16 @@ supported.
 ~~~
 
 
+## Docker
+
+Below are the commands to get up and running with Docker.
+
+~~~
+docker build -t dnsrebidner .
+docker run -it --cap-add=NET_ADMIN --cap-add=NET_RAW -p 53:53/udp -p 80:80 --name dnsrebinder dnsrebinder -d examples/www/ -c examples/config.json --root example.com -I eth0 -p 80
+~~~
+
+
 ## Browser Test
 
 A test of different browsers and how they implemented protections against DNS
@@ -111,3 +121,4 @@ The command to run the test-server from this directory would be similar to this:
 ~~~
 sudo python DNSRebinder.py -d browsertest/www/ -c browsertest/config.json -r example.com -I eth0
 ~~~
+
