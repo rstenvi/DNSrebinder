@@ -8,7 +8,7 @@ import os, sys
 import urlparse
 import re
 import random, string
-import json, yaml
+import json
 import netifaces
 import logging
 import cfg
@@ -83,7 +83,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 						call.start()
 
 			logging.debug("Trigger on domain: %s", host)
-			cfg.dnsServer.trigger_change_domain(host)
+			cfg.dnsServer.trigger_change_domain(host.split(":")[0])
 			self.send_response(200)
 		
 		elif self.path.startswith("/rebind"):
@@ -93,7 +93,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 				host = "error"
 			self.send_response(200)
 			self.end_headers()
-			self.wfile.write('{"host":"' + host + '"}\n');
+			self.wfile.write("OK")
 
 		elif self.path.startswith("/redirect"): 
 			parsed = urlparse.urlparse(self.path)

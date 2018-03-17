@@ -10,22 +10,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 from logging import handlers
 
-log = logging.getLogger('')
-log.setLevel(logging.DEBUG)
-format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-ch = logging.StreamHandler(sys.stdout)
-ch.setFormatter(format)
-log.addHandler(ch)
-
-fh = handlers.RotatingFileHandler("logfile.log", maxBytes=(1048576*5), backupCount=7)
-fh.setFormatter(format)
-log.addHandler(fh)
-
-#logging.basicConfig(level=logging.DEBUG, filename='example.log', stream=sys.stdout)
-
-#dnsServer = None
-#config={}
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='DNS rebinder')
@@ -37,6 +21,19 @@ if __name__ == "__main__":
 	parser.add_argument("--port", "-p", type=int, help="Port to use for web server", default=80)
 	parser.add_argument("--firewall", "-f", type=str, help="Pass a filename if you want to backup iptables", default=None)
 	args = vars(parser.parse_args())
+
+
+	log = logging.getLogger('')
+	log.setLevel(logging.DEBUG)
+	format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+	ch = logging.StreamHandler(sys.stdout)
+	ch.setFormatter(format)
+	log.addHandler(ch)
+
+	fh = handlers.RotatingFileHandler("logfile.log", maxBytes=(1048576*5), backupCount=7)
+	fh.setFormatter(format)
+	log.addHandler(fh)
 
 	dnsServer = dns.DNSServer()
 	fname = args["config"]
