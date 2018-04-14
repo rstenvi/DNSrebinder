@@ -140,7 +140,11 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 		# No custom event, we should just serve files
 		else:
-			host = self.headers["Host"]
+			try:
+				host = self.headers["Host"]
+			except:
+				logging.warning("HTTP request without host-header received")
+				host = ""
 			served = False
 			for s in cfg.config.get("hosts", []):
 				f = s.get("domain")
