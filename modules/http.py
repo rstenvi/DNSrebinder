@@ -121,7 +121,11 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 			# Send location header
 			try:
-				self.send_header("Location","http://" + r + "." + sub + "." + cfg.config["args"]["root"] + cfg.config.get("redirect_path", "/"))
+				addr = "http://" + r + "." + sub + "." + cfg.config["args"]["root"]
+				if cfg.config["args"]["port"] != 80:
+					addr += ":" + str(cfg.config["args"]["port"])
+				addr += cfg.config.get("redirect_path", "/")
+				self.send_header("Location", addr)
 			except:
 				logging.warning("Unable to set location header")
 			self.end_headers()
