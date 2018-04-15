@@ -9,13 +9,13 @@ from copy import deepcopy
 import logging
 from logging.handlers import RotatingFileHandler
 from logging import handlers
-
+import os
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='DNS rebinder')
-	parser.add_argument("--dir", "-d", type=str, help="Directory ro serve", required=True)
+	parser.add_argument("--js", "-j", type=str, help="JS-exploit to serve", required=True)
+	parser.add_argument("--html", "-H", type=str, help="HTML-file to serve", required=True)
 	parser.add_argument("--config", "-c", type=str, help="Config file (json)", required=True)
-	parser.add_argument("--root", "-r", type=str, help="Root DNS name", required=True)
 	parser.add_argument("--ip", "-i", type=str, help="IP to accept traffic at (web server)", default="0.0.0.0")
 	parser.add_argument("--interface", "-I", type=str, help="Interface to use when blocking traffic", default="eth0")
 	parser.add_argument("--port", "-p", type=int, help="Port to use for web server", default=80)
@@ -35,12 +35,12 @@ if __name__ == "__main__":
 	fh.setFormatter(format)
 	log.addHandler(fh)
 
+	args["js"] = os.path.abspath(args["js"])
+	args["html"] = os.path.abspath(args["html"])
 	dnsServer = dns.DNSServer()
 	fname = args["config"]
-	serve = args["dir"]
 	port = args["port"]
 	ip = args["ip"]
-	root = args["root"]
 	
 	with open(fname, "r") as f:
 		data = str(f.read())
@@ -54,6 +54,8 @@ if __name__ == "__main__":
 		if "domain" in c:
 			i = c.get("ip")
 			dnsServer.add_resolve(c.get("domain"), i, c.get("alt"))
+			if "root" in c and c["root"] == True:
+				config["root"] = c["domain"]
 		elif "wildcard" in c:
 			i = c.get("ip")
 			try:
@@ -92,5 +94,5 @@ if __name__ == "__main__":
 	uThread.start()
 
 
-	http.serve(args["dir"], args["ip"], args["port"])
+	http.serve(args["ip"], args["port"])
 	

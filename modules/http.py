@@ -12,6 +12,8 @@ import json
 import netifaces
 import logging
 import cfg
+import tempfile
+
 
 # Formatting string used for creating and deleting iptable rules
 iptables_format="-s %s -i %s -p tcp --destination-port %i -j DROP"
@@ -121,7 +123,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 			# Send location header
 			try:
-				addr = "http://" + r + "." + sub + "." + cfg.config["args"]["root"]
+				addr = "http://" + r + "." + sub + "." + cfg.config["root"]
 				if cfg.config["args"]["port"] != 80:
 					addr += ":" + str(cfg.config["args"]["port"])
 				addr += cfg.config.get("redirect_path", "/")
@@ -129,7 +131,7 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			except:
 				logging.warning("Unable to set location header")
 			self.end_headers()
-		
+
 		elif self.path.startswith("/finished"): 
 			parsed = urlparse.urlparse(self.path)
 			try:
@@ -142,34 +144,22 @@ class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write('{"status":"OK"}\n');
 
-		# No custom event, we should just serve files
-		else:
-			try:
-				host = self.headers["Host"]
-			except:
-				logging.warning("HTTP request without host-header received")
-				host = ""
-			served = False
-			for s in cfg.config.get("hosts", []):
-				f = s.get("domain")
-				if f != None and host.endswith(f):
-					with cd(s.get("path", ".")):
-						if os.path.isdir(p):
-							self.send_response(403)
-							self.end_headers()
-						else:
-							SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-						served = True
+		elif self.path.startswith(cfg.config.get("redirect_path", "/")) or self.path.startswith("/a.js"):
+			if self.path.startswith("/a.js"):
+				path = cfg.config["args"]["js"]
+			else:
+				path = cfg.config["args"]["html"]
 
-			# We have no custom code to deal with it, we don't allow listing of
-			# files, but any file can be served
-			if served == False:
-				p = SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, self.path)
-				if os.path.isdir(p):
-					self.send_response(403)
-					self.end_headers()
-				else:
-					return SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+			with open(path, "r") as f:
+				data = f.read()
+			self.send_response(200)
+			self.end_headers()
+			self.wfile.write(data)
+		else:
+			logging.warning("Invalid path specified")
+			self.send_response(401)
+			self.end_headers()
+			self.wfile.write("")
 
 	# Override log_message so that we can print to file as well
 	def log_message(self, format, *args):
@@ -188,7 +178,7 @@ def cd(newdir):
 	finally:
 		os.chdir(prevdir)
 
-def serve(d, ip, port):
+def serve(ip, port):
 	# Have not found a good way to suppress "server"-header, but we can change it
 	SimpleHTTPServer.SimpleHTTPRequestHandler.server_version = "Apache"
 	BaseHTTPServer.BaseHTTPRequestHandler.sys_version = "3.2.1"
@@ -197,6 +187,7 @@ def serve(d, ip, port):
 	SocketServer.TCPServer.allow_reuse_address = True
 	httpd = ThreadedHTTPServer((ip, port), Handler)
 
+	d = tempfile.mkdtemp()
 	try:
 		with cd(d):
 			logging.info("Starting web server at %s:%i", ip, port)
@@ -209,6 +200,7 @@ def serve(d, ip, port):
 		revert_iptables()
 		if cfg.config.get("args", {}).get("firewall") != None:
 			os.remove(args.get("firewall"))
+		os.rmdir(d)
 		raise
 
 	return
