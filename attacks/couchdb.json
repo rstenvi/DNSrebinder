@@ -1,0 +1,12 @@
+{
+"redirect_path":"/exploit.html",
+"domains": [
+ {"domain":"example.com", "ip":"1.2.3.4"},
+ {"domain":"www.example.com", "ip":"1.2.3.4"},
+ {"domain":"ns1.example.com", "ip":"1.2.3.4"},
+ {"domain":"ns2.example.com", "ip":"1.2.3.4"},
+ {"wildcard":"[a-zA-Z0-9]+\\.a\\.example\\.com", "ip":"1.2.3.4", "alt":"127.0.0.1"},
+ {"wildcard":"[a-zA-Z0-9]+\\.b\\.example\\.com", "ip":"1.2.3.4", "alt":"127.0.0.1"}
+]
+}
+
